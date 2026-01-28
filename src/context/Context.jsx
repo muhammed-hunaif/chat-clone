@@ -11,61 +11,65 @@ const ContextProvider = (props) => {
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
 
+  // Typing effect function
   const delayPara = (index, nextWord) => {
     setTimeout(() => {
       setResultData((prev) => prev + nextWord);
     }, 75 * index);
   };
 
-  const newchat = () =>{
-    setLoading(false)
-    setShowResult(false)
-  } 
-
+  const newchat = () => {
+    setLoading(false);
+    setShowResult(false);
+  };
 
   const onSent = async (prompt) => {
-    setResultData("");
+    setResultData(""); // Clear old result
     setLoading(true);
     setShowResult(true);
 
     let response;
+    // Logic to decide which prompt to use
     let currentPrompt = prompt !== undefined ? prompt : input;
 
-    if (prompt === undefined) setRecentPrompt(input);
-    else setRecentPrompt(prompt);
+    if (prompt !== undefined) {
+      setRecentPrompt(prompt);
+    } else {
+      setRecentPrompt(input);
+      setPreviousPrompts((prev) => [...prev, input]); // Storing only the prompt
+    }
 
     try {
       response = await runChat(currentPrompt);
+      
+      // Response Formatting (** for Bold, * for New Line)
+      let responseArray = response.split("**");
+      let newResponse = ""; 
+      for (let i = 0; i < responseArray.length; i++) {
+        if (i === 0 || i % 2 !== 1) {
+          newResponse += responseArray[i];
+        } else {
+          newResponse += "<b>" + responseArray[i] + "</b>";
+        }
+      }
+
+      // Replace single * with line break
+      let newResponse2 = newResponse.split("*").join("<br>");
+      
+      // Start typing animation
+      let newResponseArray = newResponse2.split(" ");
+      for (let i = 0; i < newResponseArray.length; i++) {
+        const nextWord = newResponseArray[i];
+        delayPara(i, nextWord + " ");
+      }
+
     } catch (err) {
-      setResultData("⚠️ Something went wrong. Maybe daily quota exceeded.");
+      setResultData("⚠️ Error: Could not fetch response. Try again.");
+      console.error(err);
+    } finally {
       setLoading(false);
-      return;
+      setInput("");
     }
-
-   
-    if (prompt === undefined) {
-      setPreviousPrompts((prev) => [
-        ...prev,
-        { prompt: input, answer: response },
-      ]);
-    }
-
-    
-    let responseArray = response.split("**");
-    let newResponse = " ";
-    for (let i = 0; i < responseArray.length; i++) {
-      if (i === 0 || i % 2 !== 1) newResponse += responseArray[i];
-      else newResponse += "<b>" + responseArray[i] + "</b>";
-    }
-    let newResponse2 = newResponse.split("*").join("</br>");
-    let newResponseArray = newResponse2.split(" ");
-    for (let i = 0; i < newResponseArray.length; i++) {
-      const nextWord = newResponseArray[i];
-      delayPara(i, nextWord + " ");
-    }
-
-    setLoading(false);
-    setInput(""); 
   };
 
   const contextValue = {
