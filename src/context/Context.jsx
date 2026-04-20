@@ -10,6 +10,7 @@ const ContextProvider = (props) => {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Typing effect function
   const delayPara = (index, nextWord) => {
@@ -85,7 +86,9 @@ const ContextProvider = (props) => {
     setResultData,
     input,
     setInput,
-    newchat
+    newchat,
+    menuOpen,
+    setMenuOpen
   };
 
   return <Context.Provider value={contextValue}>{props.children}</Context.Provider>;

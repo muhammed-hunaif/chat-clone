@@ -4,7 +4,7 @@ import { assets } from '../../assets/assets'
 import { Context } from '../../context/Context'
 
 const Main = () => {
-  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input } = useContext(Context);
+  const { onSent, recentPrompt, showResult, loading, resultData, setInput, input, setMenuOpen, menuOpen } = useContext(Context);
 
   // Helper to handle "Enter" key press
   const handleKeyDown = (e) => {
@@ -16,6 +16,14 @@ const Main = () => {
   return (
     <div className='main'>
       <div className='nav'>
+        {!menuOpen && (
+          <img 
+            onClick={() => setMenuOpen(true)} 
+            className="menu-hamburger" 
+            src={assets.menu_icon} 
+            alt="menu" 
+          />
+        )}
         <p>Gemini</p>
         <img src={assets.user_icon} alt='' />
       </div>
@@ -68,12 +76,12 @@ const Main = () => {
 
         <div className='main-bottom'>
           <div className='search-box'>
-            <input 
-              onChange={(e) => setInput(e.target.value)} 
+            <input
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               value={input}
-              type='text' 
-              placeholder='Enter your ques?' 
+              type='text'
+              placeholder='Enter your ques?'
               disabled={loading} // Disable input while loading
             />
             <div>
@@ -94,5 +102,6 @@ const Main = () => {
     </div>
   )
 }
+
 
 export default Main;

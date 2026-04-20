@@ -5,60 +5,79 @@ import { Context } from "../../context/Context";
 
 const Sidebar = () => {
   const [extended, setExtended] = useState(false);
-  const { prevPrompts, setRecentPrompt, setResultData, setShowResult,newchat} = useContext(Context);
+  const { onSent, prevPrompts, setRecentPrompt, newchat, menuOpen, setMenuOpen } = useContext(Context);
+
+  const loadPrompt = async (prompt) => {
+    setRecentPrompt(prompt);
+    await onSent(prompt);
+    setMenuOpen(false); // Close menu on mobile after selection
+  };
 
   return (
-    <div className="Sidebar">
-      <div className="top">
-        <img
-          onClick={() => setExtended((prev) => !prev)}
-          className="icon-menu"
-          src={assets.menu_icon}
-          alt="menu"
-        />
+    <>
+      {menuOpen && <div className="sidebar-backdrop" onClick={() => setMenuOpen(false)}></div>}
+      <div className={`Sidebar ${extended ? 'extended' : ''} ${menuOpen ? 'mobile-open' : ''}`}>
+        <div className="top">
+          <img
+            onClick={() => setExtended((prev) => !prev)}
+            className="icon-menu desktop-menu"
+            src={assets.menu_icon}
+            alt="menu"
+          />
+          <img
+            onClick={() => setMenuOpen(false)}
+            className="icon-menu mobile-close"
+            src={assets.menu_icon}
+            alt="close"
+          />
 
-        <div onClick={()=>newchat()} className="new-chat" >
-          <img src={assets.plus_icon} alt="new chat" className="icon" />
-          {extended && <p>New chat</p>}
-        </div>
-
-        {extended && (
-          <div className="recent">
-            <p className="recent-title">Recent</p>
-            {prevPrompts.length === 0 && <p className="no-recent">No recent chats</p>}
-            {prevPrompts.map((item, index) => (
-              <div
-                className="recent-entry"
-                key={index}
-                onClick={() => {
-                  setRecentPrompt(item.prompt);
-                  setResultData(item.answer); // only show previous answer
-                  setShowResult(true);
-                }}
-              >
-                <img src={assets.message_icon} alt="recent chat" className="icon" />
-                <p>{item.prompt.length > 25 ? item.prompt.substring(0, 25) + "..." : item.prompt}</p>
-              </div>
-            ))}
+          <div 
+            onClick={() => {
+              newchat();
+              setMenuOpen(false);
+            }} 
+            className="new-chat"
+          >
+            <img src={assets.plus_icon} alt="new chat" className="icon" />
+            {(extended || menuOpen) ? <p>New chat</p> : null}
           </div>
-        )}
-      </div>
 
-      <div className="bottom">
-        <div className="bottom-item recent-entry">
-          <img src={assets.question_icon} alt="help" className="icon" />
-          {extended && <p>Help</p>}
+          {(extended || menuOpen) && (
+            <div className="recent">
+              <p className="recent-title">Recent</p>
+              {prevPrompts.length === 0 && <p className="no-recent">No recent chats</p>}
+              <div className="recent-list">
+                {prevPrompts.map((item, index) => (
+                  <div
+                    className="recent-entry"
+                    key={index}
+                    onClick={() => loadPrompt(item)}
+                  >
+                    <img src={assets.message_icon} alt="recent chat" className="icon" />
+                    <p>{item.length > 20 ? item.substring(0, 20) + "..." : item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        <div className="bottom-item recent-entry">
-          <img src={assets.history_icon} alt="activity" className="icon" />
-          {extended && <p>Activity</p>}
-        </div>
-        <div className="bottom-item recent-entry">
-          <img src={assets.setting_icon} alt="settings" className="icon" />
-          {extended && <p>Setting</p>}
+
+        <div className="bottom">
+          <div className="bottom-item recent-entry">
+            <img src={assets.question_icon} alt="help" className="icon" />
+            {(extended || menuOpen) ? <p>Help</p> : null}
+          </div>
+          <div className="bottom-item recent-entry">
+            <img src={assets.history_icon} alt="activity" className="icon" />
+            {(extended || menuOpen) ? <p>Activity</p> : null}
+          </div>
+          <div className="bottom-item recent-entry">
+            <img src={assets.setting_icon} alt="settings" className="icon" />
+            {(extended || menuOpen) ? <p>Setting</p> : null}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
